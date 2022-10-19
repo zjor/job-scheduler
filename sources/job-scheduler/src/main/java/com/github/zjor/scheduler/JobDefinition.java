@@ -1,5 +1,8 @@
 package com.github.zjor.scheduler;
 
+import com.github.zjor.scheduler.dto.JobAction;
+import com.github.zjor.scheduler.dto.JobOutput;
+import com.github.zjor.scheduler.dto.JobSchedule;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +14,11 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.time.Instant;
+import java.util.Map;
 
 @Data
 @Builder
@@ -37,14 +42,14 @@ public class JobDefinition extends Model {
      */
     @Type(type = "jsonb")
     @Column(name = "action", columnDefinition = "jsonb", nullable = false)
-    private String action;
+    private JobAction action;
 
     /**
      * Map of key-values to be passed to the execution context.
      */
     @Type(type = "jsonb")
     @Column(name = "arguments", columnDefinition = "jsonb")
-    private String arguments;
+    private Map<String, Object> arguments;
 
     /**
      * Schedule definition.
@@ -58,7 +63,7 @@ public class JobDefinition extends Model {
      */
     @Type(type = "jsonb")
     @Column(name = "schedule", columnDefinition = "jsonb", nullable = false)
-    private String schedule;
+    private JobSchedule schedule;
 
     /**
      * Defines what needs to be done with the output of the action.
@@ -80,20 +85,9 @@ public class JobDefinition extends Model {
      */
     @Type(type = "jsonb")
     @Column(name = "output", columnDefinition = "jsonb", nullable = false)
-    private String output;
+    private JobOutput output;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
-
-    @Data
-    @Builder
-    public static class JobAction {
-        public final String type;
-        public final String value;
-    }
-    //TODO: type checking for job definition fields
-    //TODO: provide convenient builder methods and shortcuts
-    //TODO: transparent JSON mapping to string
-
 }
