@@ -16,7 +16,7 @@ public class SchedulerServiceTest {
 
     @Test
     public void testScheduler() {
-        service.f();
+        service.loadAndSchedule();
     }
 
 }

@@ -9,7 +9,6 @@ public class Application {
     public static void main(String[] args) {
         var context = SpringApplication.run(Application.class, args);
         var service = context.getBean(SchedulerService.class);
-        service.f();
-
+        service.loadAndSchedule();
     }
 }

@@ -26,20 +26,27 @@ import java.util.stream.StreamSupport;
 @RequestMapping("api/scheduler")
 public class SchedulerController {
 
+    private final SchedulerService schedulerService;
     private final JobDefinitionRepository jobDefinitionRepository;
 
-    public SchedulerController(JobDefinitionRepository jobDefinitionRepository) {
+    public SchedulerController(SchedulerService schedulerService,
+                               JobDefinitionRepository jobDefinitionRepository) {
+        this.schedulerService = schedulerService;
         this.jobDefinitionRepository = jobDefinitionRepository;
     }
 
     @PostMapping
     public JobDefinition create(@RequestBody CreateJobDefinitionRequest req) {
-        return jobDefinitionRepository.save(JobDefinition.builder()
-                        .action(req.action)
-                        .arguments(req.arguments)
-                        .schedule(req.schedule)
-                        .output(req.output)
-                .build());
+        try {
+            return jobDefinitionRepository.save(JobDefinition.builder()
+                    .action(req.action)
+                    .arguments(req.arguments)
+                    .schedule(req.schedule)
+                    .output(req.output)
+                    .build());
+        } finally {
+            schedulerService.loadAndSchedule();
+        }
     }
 
     @GetMapping
@@ -55,10 +62,14 @@ public class SchedulerController {
 
     @DeleteMapping("{id}")
     public JobDefinition delete(@PathVariable("id") String id) {
-        var obj = jobDefinitionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, id));
-        jobDefinitionRepository.delete(obj);
-        return obj;
+        try {
+            var obj = jobDefinitionRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, id));
+            jobDefinitionRepository.delete(obj);
+            return obj;
+        } finally {
+            schedulerService.loadAndSchedule();
+        }
     }
 
     public static <T> List<T> spliteratorToList(Spliterator<T> spliterator) {
