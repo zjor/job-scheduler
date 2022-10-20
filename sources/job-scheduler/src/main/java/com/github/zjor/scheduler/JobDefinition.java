@@ -14,7 +14,6 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.time.Instant;
@@ -40,6 +39,7 @@ public class JobDefinition extends Model {
      * ```
      * Types may be extended in the future to support dynamic source code loading.
      */
+    // TODO: extract to a separate table
     @Type(type = "jsonb")
     @Column(name = "action", columnDefinition = "jsonb", nullable = false)
     private JobAction action;
@@ -83,6 +83,7 @@ public class JobDefinition extends Model {
      * Other types may be supported in the future, e.g. "mqtt", "log", "db".
      * Array of output is supported to fan-out the result
      */
+    // TODO: extract to a separate table
     @Type(type = "jsonb")
     @Column(name = "output", columnDefinition = "jsonb", nullable = false)
     private JobOutput output;

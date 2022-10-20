@@ -7,7 +7,8 @@
 ## Tasks
 - [x] CRUD
 - [x] swagger
-- [ ] logging
+- [ ] logging (aop + endpoints)
+- [ ] unit-test of the endpoint e2e (update endpoint)
 - [ ] load schedule
 - [ ] impl quote of the day action
 - [ ] impl fan-out http-call
