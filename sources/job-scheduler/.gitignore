@@ -2,4 +2,5 @@
 *.iml
 target/
 
+.tmp.json
 Sandbox.java

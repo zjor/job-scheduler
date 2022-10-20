@@ -37,16 +37,14 @@ public class SchedulerController {
 
     @PostMapping
     public JobDefinition create(@RequestBody CreateJobDefinitionRequest req) {
-        try {
-            return jobDefinitionRepository.save(JobDefinition.builder()
-                    .action(req.action)
-                    .arguments(req.arguments)
-                    .schedule(req.schedule)
-                    .output(req.output)
-                    .build());
-        } finally {
-            schedulerService.loadAndSchedule();
-        }
+        var job = jobDefinitionRepository.save(JobDefinition.builder()
+                .action(req.action)
+                .arguments(req.arguments)
+                .schedule(req.schedule)
+                .output(req.output)
+                .build());
+        schedulerService.schedule(job);
+        return job;
     }
 
     @GetMapping
@@ -62,14 +60,11 @@ public class SchedulerController {
 
     @DeleteMapping("{id}")
     public JobDefinition delete(@PathVariable("id") String id) {
-        try {
-            var obj = jobDefinitionRepository.findById(id)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, id));
-            jobDefinitionRepository.delete(obj);
-            return obj;
-        } finally {
-            schedulerService.loadAndSchedule();
-        }
+        var obj = jobDefinitionRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, id));
+        schedulerService.stop(id);
+        jobDefinitionRepository.delete(obj);
+        return obj;
     }
 
     public static <T> List<T> spliteratorToList(Spliterator<T> spliterator) {

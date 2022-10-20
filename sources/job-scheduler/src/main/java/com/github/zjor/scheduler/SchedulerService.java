@@ -1,6 +1,7 @@
 package com.github.zjor.scheduler;
 
 import com.github.zjor.scheduler.actions.HelloWorldAction;
+import com.github.zjor.scheduler.actions.QuoteOfTheDayAction;
 import com.github.zjor.scheduler.dto.JobSchedule;
 import com.github.zjor.spring.aop.Log;
 import lombok.Getter;
@@ -40,17 +41,37 @@ public class SchedulerService {
         jobDefinitionRepository.findAll().forEach(this::schedule);
     }
 
-    private void schedule(JobDefinition job) {
+    public void schedule(JobDefinition job) {
         try {
             var schedule = job.getSchedule();
             if (schedule.getType() != JobSchedule.ScheduleType.CRON) {
                 throw new IllegalArgumentException("Unsupported schedule type: " + schedule.getType());
             }
             var cron = CronExpression.parse(schedule.getValue());
-            (new HelloWorldAction(job.getId(), this, cron)).scheduleNext();
+            var action = job.getAction();
+
+            switch (action.getValue()) {
+                case "HELLO_WORLD":
+                    (new HelloWorldAction(job.getId(), this, cron, job.getArguments())).scheduleNext();
+                    break;
+                case "QOTD":
+                    (new QuoteOfTheDayAction(job.getId(), this, cron, job.getArguments())).scheduleNext();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported action: " + action.getValue());
+            }
+
             log.info("Scheduled job: {} at schedule: {}", job.getAction().getType(), schedule.getValue());
         } catch (Throwable t) {
             log.error("Failed to schedule job (ID: " + job.getId() + "): " + t.getMessage(), t);
+        }
+    }
+
+    public void stop(String jobId) {
+        var future = schedule.get(jobId);
+        if (future != null) {
+            future.cancel(true);
+            schedule.remove(jobId);
         }
     }
 }

@@ -1,25 +1,33 @@
 package com.github.zjor.scheduler.actions;
 
 import com.github.zjor.scheduler.SchedulerService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.support.CronExpression;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public abstract class Action implements Runnable {
+@Slf4j
+public abstract class Action {
 
     public static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
 
     private final String jobId;
     private final SchedulerService schedulerService;
     private final CronExpression cron;
+    private final Map<String, Object> args;
 
-    protected Action(String jobId, SchedulerService schedulerService, CronExpression cron) {
+    protected Action(String jobId,
+                     SchedulerService schedulerService,
+                     CronExpression cron,
+                     Map<String, Object> args) {
         this.jobId = jobId;
         this.schedulerService = schedulerService;
         this.cron = cron;
+        this.args = args;
     }
 
     protected long getDelay() {
@@ -34,7 +42,12 @@ public abstract class Action implements Runnable {
     }
 
     public void execute() {
-        run();
+        log.info("Running job {}; ID: {}", getName(), jobId);
+        try {
+            run(args);
+        } catch (Throwable t) {
+            log.error("Job execution failed: " + t.getMessage(), t);
+        }
         scheduleNext();
     }
 
@@ -46,5 +59,9 @@ public abstract class Action implements Runnable {
     private long timeDifferenceMillis(LocalDateTime now, LocalDateTime then) {
         return toEpochMillis(then) - toEpochMillis(now);
     }
+
+    public abstract String getName();
+
+    protected abstract void run(Map<String, Object> args);
 
 }
