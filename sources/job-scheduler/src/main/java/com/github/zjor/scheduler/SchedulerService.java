@@ -1,11 +1,14 @@
 package com.github.zjor.scheduler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zjor.scheduler.actions.Action;
 import com.github.zjor.scheduler.actions.HelloWorldAction;
 import com.github.zjor.scheduler.actions.QuoteOfTheDayAction;
 import com.github.zjor.scheduler.actions.WeatherAction;
 import com.github.zjor.scheduler.dto.JobSchedule;
 import com.github.zjor.scheduler.model.JobDefinition;
+import com.github.zjor.scheduler.outputs.HttpOutput;
 import com.github.zjor.scheduler.outputs.LoggingOutput;
 import com.github.zjor.scheduler.outputs.Output;
 import com.github.zjor.spring.aop.Log;
@@ -54,11 +57,18 @@ public class SchedulerService {
     }
 
     private List<Output> loadOutputs(JobDefinition job) {
+        var mapper = new ObjectMapper();
         return jobOutputRepository.findJobOutputsByJobOrderByCreatedAtDesc(job)
                 .stream().map(o -> {
                     switch (o.getType()) {
                         case LOG:
                             return new LoggingOutput();
+                        case HTTP:
+                            try {
+                                return new HttpOutput(mapper.readValue(o.getDefinition(), Map.class));
+                            } catch (JsonProcessingException e) {
+                                throw new IllegalArgumentException("Failed to parse output definition: " + e.getMessage(), e);
+                            }
                         default:
                             throw new IllegalArgumentException("Unsupported type: " + o.getType());
                     }

@@ -1,5 +1,7 @@
 package com.github.zjor.scheduler.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zjor.scheduler.JobDefinitionRepository;
 import com.github.zjor.scheduler.JobOutputRepository;
 import com.github.zjor.scheduler.SchedulerService;
@@ -28,6 +30,8 @@ public class JobOutputController {
     private final JobDefinitionRepository jobDefinitionRepository;
     private final JobOutputRepository jobOutputRepository;
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
     public JobOutputController(
             SchedulerService schedulerService,
             JobDefinitionRepository jobDefinitionRepository,
@@ -38,11 +42,12 @@ public class JobOutputController {
     }
 
     @PostMapping
-    public JobOutput create(@PathVariable("jobId") String jobId, @RequestBody CreateJobOutputRequest req) {
+    public JobOutput create(@PathVariable("jobId") String jobId, @RequestBody CreateJobOutputRequest req) throws JsonProcessingException {
         var job = jobDefinitionRepository.findById(jobId).orElseThrow(notFound(jobId));
         var output = jobOutputRepository.save(JobOutput.builder()
                 .job(job)
                 .type(req.getType())
+                .definition(mapper.writeValueAsString(req.getValue()))
                 .build());
         schedulerService.stop(jobId);
         schedulerService.schedule(job);
