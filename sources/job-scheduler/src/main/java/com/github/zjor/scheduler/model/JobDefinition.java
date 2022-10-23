@@ -1,7 +1,6 @@
-package com.github.zjor.scheduler;
+package com.github.zjor.scheduler.model;
 
 import com.github.zjor.scheduler.dto.JobAction;
-import com.github.zjor.scheduler.dto.JobOutput;
 import com.github.zjor.scheduler.dto.JobSchedule;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
@@ -64,29 +63,6 @@ public class JobDefinition extends Model {
     @Type(type = "jsonb")
     @Column(name = "schedule", columnDefinition = "jsonb", nullable = false)
     private JobSchedule schedule;
-
-    /**
-     * Defines what needs to be done with the output of the action.
-     * ```
-     * {
-     *   "type": "http",
-     *   "value": {
-     *     "url": "...",
-     *     "auth": {
-     *       "type": "basic",
-     *       "login": "alice",
-     *       "password": "s3cr3t"
-     *     }
-     *   }
-     * }
-     * ```
-     * Other types may be supported in the future, e.g. "mqtt", "log", "db".
-     * Array of output is supported to fan-out the result
-     */
-    // TODO: extract to a separate table
-    @Type(type = "jsonb")
-    @Column(name = "output", columnDefinition = "jsonb", nullable = false)
-    private JobOutput output;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

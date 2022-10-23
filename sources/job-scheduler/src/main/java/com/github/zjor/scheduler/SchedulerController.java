@@ -3,6 +3,7 @@ package com.github.zjor.scheduler;
 import com.github.zjor.scheduler.dto.JobAction;
 import com.github.zjor.scheduler.dto.JobOutput;
 import com.github.zjor.scheduler.dto.JobSchedule;
+import com.github.zjor.scheduler.model.JobDefinition;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

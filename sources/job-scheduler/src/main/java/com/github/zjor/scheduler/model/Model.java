@@ -1,4 +1,4 @@
-package com.github.zjor.scheduler;
+package com.github.zjor.scheduler.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

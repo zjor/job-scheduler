@@ -3,11 +3,14 @@ package com.github.zjor.scheduler;
 import com.github.zjor.scheduler.actions.HelloWorldAction;
 import com.github.zjor.scheduler.actions.QuoteOfTheDayAction;
 import com.github.zjor.scheduler.dto.JobSchedule;
+import com.github.zjor.scheduler.model.JobDefinition;
+import com.github.zjor.scheduler.outputs.Output;
 import com.github.zjor.spring.aop.Log;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.support.CronExpression;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -50,12 +53,16 @@ public class SchedulerService {
             var cron = CronExpression.parse(schedule.getValue());
             var action = job.getAction();
 
+            var outputs = Collections.<Output>emptyList();
+
             switch (action.getValue()) {
                 case "HELLO_WORLD":
-                    (new HelloWorldAction(job.getId(), this, cron, job.getArguments())).scheduleNext();
+                    (new HelloWorldAction(job.getId(), this, cron, job.getArguments(), outputs))
+                            .scheduleNext();
                     break;
                 case "QOTD":
-                    (new QuoteOfTheDayAction(job.getId(), this, cron, job.getArguments())).scheduleNext();
+                    (new QuoteOfTheDayAction(job.getId(), this, cron, job.getArguments(), outputs))
+                            .scheduleNext();
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported action: " + action.getValue());

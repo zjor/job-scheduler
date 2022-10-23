@@ -1,12 +1,16 @@
 package com.github.zjor.scheduler.actions;
 
 import com.github.zjor.scheduler.SchedulerService;
+import com.github.zjor.scheduler.outputs.Output;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.support.CronExpression;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -20,14 +24,20 @@ public abstract class Action {
     private final CronExpression cron;
     private final Map<String, Object> args;
 
+    @Getter(AccessLevel.PROTECTED)
+    private final List<Output> outputs;
+
+    // TODO: code smell: action knows the whole job internals
     protected Action(String jobId,
                      SchedulerService schedulerService,
                      CronExpression cron,
-                     Map<String, Object> args) {
+                     Map<String, Object> args,
+                     List<Output> outputs) {
         this.jobId = jobId;
         this.schedulerService = schedulerService;
         this.cron = cron;
         this.args = args;
+        this.outputs = outputs;
     }
 
     protected long getDelay() {
@@ -37,14 +47,14 @@ public abstract class Action {
     }
 
     public void scheduleNext() {
-        var future = schedulerService.getExecutorService().schedule(this::execute, getDelay(), TIME_UNIT);
+        var future = schedulerService.getExecutorService().schedule(this::invoke, getDelay(), TIME_UNIT);
         schedulerService.getSchedule().put(jobId, future);
     }
 
-    public void execute() {
+    private void invoke() {
         log.info("Running job {}; ID: {}", getName(), jobId);
         try {
-            run(args);
+            execute(args);
         } catch (Throwable t) {
             log.error("Job execution failed: " + t.getMessage(), t);
         }
@@ -62,6 +72,6 @@ public abstract class Action {
 
     public abstract String getName();
 
-    protected abstract void run(Map<String, Object> args);
+    protected abstract void execute(Map<String, Object> args);
 
 }

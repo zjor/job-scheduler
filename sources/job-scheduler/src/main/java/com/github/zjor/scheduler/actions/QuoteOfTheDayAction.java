@@ -1,6 +1,7 @@
 package com.github.zjor.scheduler.actions;
 
 import com.github.zjor.scheduler.SchedulerService;
+import com.github.zjor.scheduler.outputs.Output;
 import kong.unirest.Unirest;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +19,12 @@ public class QuoteOfTheDayAction extends Action {
     private JQuote quote = null;
 
     public QuoteOfTheDayAction(String jobId,
-                                  SchedulerService schedulerService,
-                                  CronExpression cron,
-                                  Map<String, Object> args) {
-        super(jobId, schedulerService, cron, args);
+                               SchedulerService schedulerService,
+                               CronExpression cron,
+                               Map<String, Object> args,
+                               List<Output> outputs
+    ) {
+        super(jobId, schedulerService, cron, args, outputs);
     }
 
     @Override
@@ -30,7 +33,7 @@ public class QuoteOfTheDayAction extends Action {
     }
 
     @Override
-    protected void run(Map<String, Object> args) {
+    protected void execute(Map<String, Object> args) {
         if (quote == null) {
             var category = (String) args.getOrDefault("category", DEFAULT_CATEGORY);
             quote = fetchQuoteOfTheDay(category);

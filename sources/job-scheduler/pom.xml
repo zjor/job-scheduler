@@ -90,6 +90,14 @@
             <version>3.13.11</version>
         </dependency>
 
+        <!-- Integration dependencies -->
+        <dependency>
+            <groupId>com.github.prominence</groupId>
+            <artifactId>openweathermap-api</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <!-- End of integration dependencies-->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
