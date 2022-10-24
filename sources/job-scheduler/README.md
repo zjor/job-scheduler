@@ -14,7 +14,8 @@
 - [ ] unit-test of the endpoint e2e (update endpoint)
 - [ ] add endpoint to trigger job manually
 - [ ] store next trigger time in the DB and restore on load
-- [ ] load schedule
+- [ ] store execution result, output data in JSON, elapsed time
+- [x] load schedule
 - [ ] impl quote of the day action
 - [ ] impl fan-out http-call
 - [ ] impl picture of the day

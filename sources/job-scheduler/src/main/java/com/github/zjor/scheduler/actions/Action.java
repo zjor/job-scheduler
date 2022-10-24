@@ -53,10 +53,14 @@ public abstract class Action {
 
     private void invoke() {
         log.info("Running job {}; ID: {}", getName(), jobId);
+        var now = System.currentTimeMillis();
         try {
             execute(args);
         } catch (Throwable t) {
             log.error("Job execution failed: " + t.getMessage(), t);
+        } finally {
+            var elapsed = System.currentTimeMillis() - now;
+            log.info("Job (name: {}, ID: {}): elapsed time: {}ms", getName(), jobId, elapsed);
         }
         scheduleNext();
     }

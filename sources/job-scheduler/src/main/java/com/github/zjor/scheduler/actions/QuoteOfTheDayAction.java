@@ -2,6 +2,7 @@ package com.github.zjor.scheduler.actions;
 
 import com.github.zjor.scheduler.SchedulerService;
 import com.github.zjor.scheduler.outputs.Output;
+import com.github.zjor.util.TimedCache;
 import kong.unirest.Unirest;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +14,12 @@ import java.util.Map;
 @Slf4j
 public class QuoteOfTheDayAction extends Action {
 
+    private static final String CACHE_KEY = "quote";
+
     private static final String URL = "https://quotes.rest/qod.json";
     private static final String DEFAULT_CATEGORY = "inspire";
 
-    private JQuote quote = null;
+    private final TimedCache<String, JQuote> cache = new TimedCache(12_3600_000L);
 
     public QuoteOfTheDayAction(String jobId,
                                SchedulerService schedulerService,
@@ -34,18 +37,28 @@ public class QuoteOfTheDayAction extends Action {
 
     @Override
     protected void execute(Map<String, Object> args) {
+        var quote = getQuote(args);
+        getOutputs().forEach(output -> output.output(quote));
+    }
+
+    // TODO: code smell: caching logic duplication, cache could be centralized
+    // timeout may be key-specific
+    private JQuote getQuote(Map<String, Object> args) {
+        JQuote quote = cache.get(CACHE_KEY);
         if (quote == null) {
+            log.info("Cache miss. Loading quote.");
             var category = (String) args.getOrDefault("category", DEFAULT_CATEGORY);
             quote = fetchQuoteOfTheDay(category);
+            cache.put(CACHE_KEY, quote);
         }
-        log.info("QOTD: {}", quote);
+        return quote;
     }
 
     private JQuote fetchQuoteOfTheDay(String category) {
         var res = Unirest
                 .get(URL)
-                .connectTimeout(15_000)
-                .socketTimeout(45_000)
+                .connectTimeout(30_000)
+                .socketTimeout(90_000)
                 .queryString("category", category)
                 .asObject(JQuoteResponse.class).getBody();
         return res.getContents().quotes.get(0);
