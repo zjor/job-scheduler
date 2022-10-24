@@ -38,7 +38,8 @@ public class QuoteOfTheDayAction extends Action {
     @Override
     protected void execute(Map<String, Object> args) {
         var quote = getQuote(args);
-        outputs.forEach(output -> output.output(quote));
+        var fmt = String.format("\n`\"%s\"`\n\t\t\t`-- %s`", quote.quote, quote.author);
+        outputs.forEach(output -> output.output(fmt));
     }
 
     // TODO: code smell: caching logic duplication, cache could be centralized

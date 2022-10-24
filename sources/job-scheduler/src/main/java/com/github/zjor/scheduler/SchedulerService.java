@@ -20,9 +20,9 @@ import org.springframework.scheduling.support.CronExpression;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,8 +48,7 @@ public class SchedulerService {
         this.jobDefinitionRepository = jobDefinitionRepository;
         this.jobOutputRepository = jobOutputRepository;
 
-        // TODO: thread pool
-        executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService = new ScheduledThreadPoolExecutor(5);
     }
 
     @Log
@@ -108,7 +107,7 @@ public class SchedulerService {
             }
             actionInstance.scheduleNext();
 
-            log.info("Scheduled job: {} at schedule: {}", job.getAction().getType(), schedule.getValue());
+            log.info("Scheduled job (name: {}; ID: {}) at: {}", actionInstance.getName(), job.getId(), schedule.getValue());
         } catch (Throwable t) {
             log.error("Failed to schedule job (ID: " + job.getId() + "): " + t.getMessage(), t);
         }

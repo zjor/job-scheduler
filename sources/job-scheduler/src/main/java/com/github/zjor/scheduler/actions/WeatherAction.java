@@ -28,7 +28,7 @@ public class WeatherAction extends Action {
                          List<Output> outputs) {
         super(context, jobId, cron, args, outputs);
         var apiKey = environment.getRequiredProperty("WEATHER_API_KEY");
-        client = new OpenWeatherMapClient("cb072fa47b3b00a9bc42520e39b57904");
+        client = new OpenWeatherMapClient(apiKey);
     }
 
     @Override
