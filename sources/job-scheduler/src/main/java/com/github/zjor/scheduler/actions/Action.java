@@ -54,6 +54,11 @@ public abstract class Action {
         schedulerService.getSchedule().put(jobId, future);
     }
 
+    public void invokeNow() {
+        var future = schedulerService.getExecutorService().submit(this::invoke);
+        schedulerService.getSchedule().put(jobId, future);
+    }
+
     private void invoke() {
         log.info("Running job {}; ID: {}", getName(), jobId);
         var now = System.currentTimeMillis();

@@ -20,8 +20,8 @@ import org.springframework.scheduling.support.CronExpression;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.stream.Collectors;
 
@@ -29,7 +29,10 @@ import java.util.stream.Collectors;
 public class SchedulerService {
 
     @Getter
-    private final Map<String, ScheduledFuture<?>> schedule = new ConcurrentHashMap<>();
+    private final Map<String, Future<?>> schedule = new ConcurrentHashMap<>();
+
+    @Getter
+    private final Map<String, Action> actions = new ConcurrentHashMap<>();
 
     private final ApplicationContext applicationContext;
 
@@ -105,6 +108,7 @@ public class SchedulerService {
                 default:
                     throw new IllegalArgumentException("Unsupported action: " + action.getValue());
             }
+            actions.put(job.getId(), actionInstance);
             actionInstance.scheduleNext();
 
             log.info("Scheduled job (name: {}; ID: {}) at: {}", actionInstance.getName(), job.getId(), schedule.getValue());

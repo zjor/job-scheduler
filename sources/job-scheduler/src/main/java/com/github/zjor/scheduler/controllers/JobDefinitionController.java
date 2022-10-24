@@ -60,10 +60,17 @@ public class JobDefinitionController {
 
     @DeleteMapping("{id}")
     public JobDefinition delete(@PathVariable("id") String id) {
-        var obj = jobDefinitionRepository.findById(id).orElseThrow(notFound(id));
+        var job = jobDefinitionRepository.findById(id).orElseThrow(notFound(id));
         schedulerService.stop(id);
-        jobDefinitionRepository.delete(obj);
-        return obj;
+        jobDefinitionRepository.delete(job);
+        return job;
+    }
+
+    @PostMapping("{id}/trigger")
+    public void trigger(@PathVariable("id") String id) {
+        var job = jobDefinitionRepository.findById(id).orElseThrow(notFound(id));
+        schedulerService.stop(id);
+        schedulerService.getActions().get(id).invokeNow();
     }
 
     public static <T> List<T> spliteratorToList(Spliterator<T> spliterator) {
