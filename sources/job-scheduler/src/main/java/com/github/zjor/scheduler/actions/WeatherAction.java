@@ -3,10 +3,10 @@ package com.github.zjor.scheduler.actions;
 import com.github.prominence.openweathermap.api.OpenWeatherMapClient;
 import com.github.prominence.openweathermap.api.enums.Language;
 import com.github.prominence.openweathermap.api.model.weather.Weather;
-import com.github.zjor.scheduler.SchedulerService;
 import com.github.zjor.scheduler.outputs.Output;
 import com.github.zjor.util.TimedCache;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.support.CronExpression;
 
 import java.util.List;
@@ -21,13 +21,13 @@ public class WeatherAction extends Action {
     private final TimedCache<String, Weather> cache = new TimedCache(12_3600_000L);
 
     // TODO: inject environment & read the API key
-    public WeatherAction(
-            String jobId,
-            SchedulerService schedulerService,
-            CronExpression cron,
-            Map<String, Object> args,
-            List<Output> outputs) {
-        super(jobId, schedulerService, cron, args, outputs);
+    public WeatherAction(ApplicationContext context,
+                         String jobId,
+                         CronExpression cron,
+                         Map<String, Object> args,
+                         List<Output> outputs) {
+        super(context, jobId, cron, args, outputs);
+        var apiKey = environment.getRequiredProperty("WEATHER_API_KEY");
         client = new OpenWeatherMapClient("cb072fa47b3b00a9bc42520e39b57904");
     }
 
@@ -54,6 +54,6 @@ public class WeatherAction extends Action {
     @Override
     protected void execute(Map<String, Object> args) {
         var weather = getWeather(args);
-        getOutputs().forEach(output -> output.output(weather));
+        outputs.forEach(output -> output.output(weather));
     }
 }

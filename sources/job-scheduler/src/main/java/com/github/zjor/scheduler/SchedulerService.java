@@ -14,6 +14,7 @@ import com.github.zjor.scheduler.outputs.Output;
 import com.github.zjor.spring.aop.Log;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.support.CronExpression;
 
 import java.util.List;
@@ -30,6 +31,8 @@ public class SchedulerService {
     @Getter
     private final Map<String, ScheduledFuture<?>> schedule = new ConcurrentHashMap<>();
 
+    private final ApplicationContext applicationContext;
+
     @Getter
     private final ScheduledExecutorService executorService;
 
@@ -38,8 +41,10 @@ public class SchedulerService {
     private final JobOutputRepository jobOutputRepository;
 
     public SchedulerService(
+            ApplicationContext applicationContext,
             JobDefinitionRepository jobDefinitionRepository,
             JobOutputRepository jobOutputRepository) {
+        this.applicationContext = applicationContext;
         this.jobDefinitionRepository = jobDefinitionRepository;
         this.jobOutputRepository = jobOutputRepository;
 
@@ -90,13 +95,13 @@ public class SchedulerService {
             Action actionInstance;
             switch (action.getValue()) {
                 case "HELLO_WORLD":
-                    actionInstance = new HelloWorldAction(job.getId(), this, cron, job.getArguments(), outputs);
+                    actionInstance = new HelloWorldAction(applicationContext, job.getId(), cron, job.getArguments(), outputs);
                     break;
                 case "QOTD":
-                    actionInstance = new QuoteOfTheDayAction(job.getId(), this, cron, job.getArguments(), outputs);
+                    actionInstance = new QuoteOfTheDayAction(applicationContext, job.getId(), cron, job.getArguments(), outputs);
                     break;
                 case "WEATHER":
-                    actionInstance = new WeatherAction(job.getId(), this, cron, job.getArguments(), outputs);
+                    actionInstance = new WeatherAction(applicationContext, job.getId(), cron, job.getArguments(), outputs);
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported action: " + action.getValue());

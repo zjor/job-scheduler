@@ -1,11 +1,11 @@
 package com.github.zjor.scheduler.actions;
 
-import com.github.zjor.scheduler.SchedulerService;
 import com.github.zjor.scheduler.outputs.Output;
 import com.github.zjor.util.TimedCache;
 import kong.unirest.Unirest;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.support.CronExpression;
 
 import java.util.List;
@@ -21,13 +21,13 @@ public class QuoteOfTheDayAction extends Action {
 
     private final TimedCache<String, JQuote> cache = new TimedCache(12_3600_000L);
 
-    public QuoteOfTheDayAction(String jobId,
-                               SchedulerService schedulerService,
+    public QuoteOfTheDayAction(ApplicationContext context,
+                               String jobId,
                                CronExpression cron,
                                Map<String, Object> args,
                                List<Output> outputs
     ) {
-        super(jobId, schedulerService, cron, args, outputs);
+        super(context, jobId, cron, args, outputs);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class QuoteOfTheDayAction extends Action {
     @Override
     protected void execute(Map<String, Object> args) {
         var quote = getQuote(args);
-        getOutputs().forEach(output -> output.output(quote));
+        outputs.forEach(output -> output.output(quote));
     }
 
     // TODO: code smell: caching logic duplication, cache could be centralized
