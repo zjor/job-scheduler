@@ -8,16 +8,9 @@
 - between action and output there should be a transformer
 
 ## Tasks
-- [x] CRUD
-- [x] swagger
-- [ ] logging (aop + endpoints)
 - [ ] unit-test of the endpoint e2e (update endpoint)
-- [ ] add endpoint to trigger job manually
 - [ ] store next trigger time in the DB and restore on load
 - [ ] store execution result, output data in JSON, elapsed time
-- [x] load schedule
-- [ ] impl quote of the day action
-- [ ] impl fan-out http-call
 - [ ] impl picture of the day
 - [ ] impl HTTP diff
 - [ ] impl binance order checker
